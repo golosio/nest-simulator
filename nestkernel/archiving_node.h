@@ -34,6 +34,7 @@
 // C++ includes:
 #include <algorithm>
 #include <deque>
+#include <mutex>
 
 // Includes from nestkernel:
 #include "histentry.h"
@@ -41,6 +42,8 @@
 #include "nest_types.h"
 #include "node.h"
 #include "synaptic_element.h"
+#include "../models/stdp_connection.h"
+#include "target_identifier.h"
 
 // Includes from sli:
 #include "dictdatum.h"
@@ -60,6 +63,13 @@ class Archiving_Node : public Node
   using Node::get_synaptic_elements;
 
 public:
+  std::vector<STDPConnection<TargetIdentifierPtrRport>* > rev_connections;
+  std::vector<Archiving_Node*> rev_connection_source;
+  std::vector<double> spike_times;
+  std::mutex spike_times_mtx;
+  void update_max_delay(double delay)
+  { max_delay_ = std::max( delay, max_delay_ ); }
+  
   /**
    * \fn Archiving_Node()
    * Constructor.
@@ -78,6 +88,8 @@ public:
    */
   double get_Ca_minus() const;
 
+  std::vector<double> &get_spike_times() { return spike_times; }
+  std::mutex *get_spike_times_mtx() { return &spike_times_mtx; }
   /**
    * \fn double get_synaptic_elements(Name n)
    * get the number of synaptic element for the current Node
@@ -200,6 +212,10 @@ public:
    */
   double get_tau_Ca() const;
 
+  double get_tau_minus() { return tau_minus_; }
+
+  void update_stdp_connections(double t_postspike);
+  
 protected:
   /**
    * \fn void set_spiketime(Time const & t_sp, double offset)

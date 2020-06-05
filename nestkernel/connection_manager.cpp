@@ -53,7 +53,8 @@
 #include "node.h"
 #include "target_table_devices_impl.h"
 #include "vp_manager_impl.h"
-
+#include "../models/stdp_connection.h"
+#include "target_identifier.h"
 // Includes from sli:
 #include "dictutils.h"
 #include "sliexceptions.h"
@@ -546,20 +547,38 @@ nest::ConnectionManager::connect_( Node& s,
       "connection." );
   }
 
-  if ( kernel().model_manager.connector_requires_urbanczik_archiving( syn_id )
-    and not r.supports_urbanczik_archiving() )
-  {
-    throw NotImplemented(
-      "This synapse model is not supported by the neuron model of at least one "
-      "connection." );
-  }
-
   kernel()
     .model_manager.get_synapse_prototype( syn_id, tid )
     .add_connection( s, r, connections_[ tid ], syn_id, params, delay, weight );
   source_table_.add_source( tid, syn_id, s_node_id, is_primary );
 
   increase_connection_count( tid, syn_id );
+
+  if (syn_id==21) {
+    Archiving_Node *ar = dynamic_cast< Archiving_Node* >( &r );
+    if (!ar) {
+      throw NotImplemented(
+      "This synapse model is not supported by the neuron model of at least one "
+      "connection." );
+    }
+    Archiving_Node *as = dynamic_cast< Archiving_Node* >( &s );
+    if (!as) {
+      throw NotImplemented(
+      "This synapse model is not supported by the neuron model of at least one "
+      "connection." );
+    }
+    ConnectorBase *connector_base_pt = connections_[ tid ][ syn_id ];
+    Connector< STDPConnection<TargetIdentifierPtrRport> >* connector_pt
+      = static_cast< Connector< STDPConnection<TargetIdentifierPtrRport> >* >
+      ( connector_base_pt );
+    index lcid = connector_pt->size() - 1;
+    STDPConnection<TargetIdentifierPtrRport> *stdp_conn
+      = &connector_pt->C_[lcid];
+    ar->rev_connections.push_back(stdp_conn);
+    ar->rev_connection_source.push_back(as);
+    as->update_max_delay(fabs( stdp_conn->get_delay()
+			       - stdp_conn->get_den_delay() ) );
+  }
 
   // We do not check has_primary_connections_ and secondary_connections_exist_
   // directly as this led to worse performance on the supercomputer Piz Daint.

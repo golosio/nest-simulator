@@ -68,15 +68,15 @@ extern "C" int aeif_cond_alpha_dynamics( double, const double*, double*, void* )
  */
 extern "C" int aeif_cond_alpha_dynamics_DT0( double, const double*, double*, void* );
 
-/* BeginUserDocs: neuron, integrate-and-fire, adaptive threshold, conductance-based
+/** @BeginDocumentation
+@ingroup Neurons
+@ingroup iaf
+@ingroup aeif
+@ingroup cond
 
-Short description
-+++++++++++++++++
-
-Conductance based exponential integrate-and-fire neuron model
-
-Description
-+++++++++++
+Name: aeif_cond_alpha -  Conductance based exponential integrate-and-fire neuron
+                         model according to Brette and Gerstner (2005).
+Description:
 
 aeif_cond_alpha is the adaptive exponential integrate and fire neuron according
 to Brette and Gerstner (2005).
@@ -86,24 +86,20 @@ This implementation uses the embedded 4th order Runge-Kutta-Fehlberg solver with
 adaptive step size to integrate the differential equation.
 
 The membrane potential is given by the following differential equation:
-
-.. math::
-
- C_m \frac{dV}{dt} =
- -g_L(V-E_L)+g_L\Delta_T\exp\left(\frac{V-V_{th}}{\Delta_T}\right) -
- g_e(t)(V-E_e) \\
-                                                     -g_i(t)(V-E_i)-w +I_e
+@f[ C_m \frac{dV}{dt} =
+-g_L(V-E_L)+g_L\Delta_T\exp\left(\frac{V-V_{th}}{\Delta_T}\right) -
+g_e(t)(V-E_e) \\
+                                                     -g_i(t)(V-E_i)-w +I_e @f]
 
 and
 
-.. math::
+@f[ \tau_w \frac{dw}{dt} = a(V-E_L) - w @f]
 
- \tau_w \frac{dw}{dt} = a(V-E_L) - w
-
-Parameters
-++++++++++
+Parameters:
 
 The following parameters can be set in the status dictionary.
+
+\verbatim embed:rst
 
 ======== ======= =======================================
 **Dynamic state variables:**
@@ -116,6 +112,7 @@ The following parameters can be set in the status dictionary.
  w       pA      Spike-adaptation current
 ======== ======= =======================================
 
+
 ======== ======= =======================================
 **Membrane Parameters**
 --------------------------------------------------------
@@ -126,6 +123,7 @@ The following parameters can be set in the status dictionary.
  g_L     nS      Leak conductance
  I_e     pA      Constant external input current
 ======== ======= =======================================
+
 
 ======== ======= ==================================
 **Spike adaptation parameters**
@@ -156,32 +154,25 @@ gsl_error_tol real    This parameter controls the admissible error of the
                       GSL integrator. Reduce it if NEST complains about
                       numerical instabilities.
 ============= ======= =========================================================
+\endverbatim
 
-Sends
-+++++
+Authors: Marc-Oliver Gewaltig; full revision by Tanguy Fardet on December 2016
 
-SpikeEvent
+Sends: SpikeEvent
 
-Receives
-++++++++
+Receives: SpikeEvent, CurrentEvent, DataLoggingRequest
 
-SpikeEvent, CurrentEvent, DataLoggingRequest
+References:
 
-References
-++++++++++
-
-.. [1] Brette R and Gerstner W (2005). Adaptive exponential
-       integrate-and-fire model as an effective description of neuronal
-       activity. Journal of Neurophysiology. 943637-3642
+\verbatim embed:rst
+.. [1] Brette R and Gerstner W (2005). Adaptive Exponential
+       Integrate-and-Fire Model as an Effective Description of Neuronal
+       Activity. J Neurophysiol 94:3637-3642
        DOI: https://doi.org/10.1152/jn.00686.2005
+\endverbatim
 
-See also
-++++++++
-
-iaf_cond_alpha, aeif_cond_exp
-
-EndUserDocs */
-
+SeeAlso: iaf_cond_alpha, aeif_cond_exp
+*/
 class aeif_cond_alpha : public Archiving_Node
 {
 

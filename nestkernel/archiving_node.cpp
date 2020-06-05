@@ -197,6 +197,18 @@ void
 nest::Archiving_Node::set_spiketime( Time const& t_sp, double offset )
 {
   const double t_sp_ms = t_sp.get_ms() - offset;
+
+  ///// CRITICAL SECTION /////
+  spike_times_mtx.lock();
+  spike_times.push_back(t_sp_ms);
+  while (spike_times.size()>=2 &&
+      (t_sp_ms - spike_times[1]) > max_delay_
+      + kernel().connection_manager.get_stdp_eps() ) {
+    spike_times.erase(spike_times.begin());      
+  }
+  spike_times_mtx.unlock();
+  ////////////////////////////
+   
   update_synaptic_elements( t_sp_ms );
   Ca_minus_ += beta_Ca_;
 
@@ -231,6 +243,8 @@ nest::Archiving_Node::set_spiketime( Time const& t_sp, double offset )
   {
     last_spike_ = t_sp_ms;
   }
+  
+  update_stdp_connections(t_sp_ms);
 }
 
 void
@@ -465,4 +479,92 @@ nest::Archiving_Node::connect_synaptic_element( Name name, int n )
   }
 }
 
+void
+nest::Archiving_Node::update_stdp_connections(double t_spike_post_last)
+{
+  for (uint i=0; i<rev_connections.size(); i++) {
+    STDPConnection<TargetIdentifierPtrRport> *stdp_conn
+      = rev_connections[i];
+    Archiving_Node *s = rev_connection_source[i];
+    
+    double delay_post = stdp_conn->get_den_delay();
+    double delay_pre = stdp_conn->get_delay();
+
+    double t_spike_pre_last = 0;
+    double t_spike_pre_k = 0;
+    double t_spike_pre_km1 = 0;
+
+    ///// CRITICAL SECTION /////
+    spike_times_mtx.lock();
+    uint n_pre_spikes = s->spike_times.size();
+    if (n_pre_spikes > 0) {
+      t_spike_pre_last = s->spike_times[n_pre_spikes - 1];
+      // Check if presynaptic and postsynaptic neurons spike at the same time
+      if (t_spike_pre_last == t_spike_post_last) {
+	n_pre_spikes--;
+	if (n_pre_spikes > 0) {
+	  t_spike_pre_last = s->spike_times[n_pre_spikes - 1];
+	}
+	else {
+	  t_spike_pre_last = 0;
+	}
+      }
+    }
+    
+    uint k = n_pre_spikes;    
+    if (n_pre_spikes>0 && delay_pre>delay_post) {
+      while (k>0 && (s->spike_times[k - 1] + delay_pre) >
+	     (t_spike_post_last + delay_post) ) {
+	k--;
+      }
+      t_spike_pre_k = s->spike_times[k];
+      if (k>0) {
+	t_spike_pre_km1 = s->spike_times[k-1];
+      }
+    }
+    spike_times_mtx.unlock();
+    ///// END CRITICAL SECTION /////
+    
+    uint n_post_spikes = spike_times.size();
+
+    if (n_pre_spikes>0) {
+      if (delay_pre > delay_post) {
+	// facilitation
+	if (k>0) {
+	  if ( n_post_spikes==1 || (t_spike_pre_km1 + delay_pre) >
+	       (spike_times[n_post_spikes-2] + delay_post) ) {
+	    double Dt = t_spike_post_last + delay_post -
+	      (t_spike_pre_km1 + delay_pre);
+	    stdp_conn->weight_update(Dt, tau_minus_);
+	  }
+	}
+	// depression
+	if (k < n_pre_spikes) {
+	  if (n_post_spikes>1) {
+	    double t_spike_post_lastm1 = spike_times[n_post_spikes-2];
+	    if ( k==0 || (t_spike_post_lastm1 + delay_post) >
+		 (t_spike_pre_km1 + delay_pre) ) {
+	      stdp_conn->set_previous_weight();
+	    }
+	  }
+	  double Dt = t_spike_post_last + delay_post
+	    - (t_spike_pre_k + delay_pre);
+	  stdp_conn->weight_update(Dt, tau_minus_);
+	}
+      }
+      else {
+	if (n_post_spikes==1 ||
+	    (n_post_spikes>1 &&
+	     t_spike_pre_last + delay_pre >=
+	     ( spike_times[n_post_spikes - 2] + delay_post ) ) ) {
+	  double Dt = t_spike_post_last + delay_post
+	    - (t_spike_pre_last + delay_pre);
+	  stdp_conn->weight_update(Dt, tau_minus_);
+	}
+      }
+    }
+  }
+}
+
+  
 } // of namespace nest

@@ -57,15 +57,16 @@ namespace nest
  */
 extern "C" int aeif_psc_delta_dynamics( double, const double*, double*, void* );
 
-/* BeginUserDocs: neuron, adaptive threshold, integrate-and-fire, current-based
+/** @BeginDocumentation
+@ingroup Neurons
+@ingroup iaf
+@ingroup aeif
+@ingroup psc
 
-Short description
-+++++++++++++++++
+Name: aeif_psc_delta - Current-based adaptive exponential integrate-and-fire
+neuron model according to Brette and Gerstner (2005) with delta synapse.
 
-Current-based adaptive exponential integrate-and-fire neuron model with delta synapse
-
-Description
-+++++++++++
+Description:
 
 aeif_psc_delta is the adaptive exponential integrate and fire neuron
 according to Brette and Gerstner (2005), with post-synaptic currents
@@ -76,29 +77,24 @@ solver with adaptive stepsize to integrate the differential equation.
 
 The membrane potential is given by the following differential equation:
 
-.. math::
-
- C dV/dt= -g_L(V-E_L)+g_L*\Delta_T*\exp((V-V_T)/\Delta_T)-g_e(t)(V-E_e) \\
-                                                     -g_i(t)(V-E_i)-w +I_e
+@f[ C dV/dt= -g_L(V-E_L)+g_L*\Delta_T*\exp((V-V_T)/\Delta_T)-g_e(t)(V-E_e) \\
+                                                     -g_i(t)(V-E_i)-w +I_e @f]
 
 and
 
-.. math::
+@f[ \tau_w * dw/dt= a(V-E_L) -W @f]
 
- \tau_w * dw/dt= a(V-E_L) -W
-
-.. math::
-
- I(t) = J \sum_k \delta(t - t^k).
+@f[ I(t) = J \sum_k \delta(t - t^k). @f]
 
 Here delta is the dirac delta function and k indexes incoming
 spikes. This is implemented such that V_m will be incremented/decremented by
 the value of J after a spike.
 
-Parameters
-++++++++++
+Parameters:
 
 The following parameters can be set in the status dictionary.
+
+\verbatim embed:rst
 
 ======== ======= =======================================
 **Dynamic state variables**
@@ -137,32 +133,25 @@ gsl_error_tol real    This parameter controls the admissible error of the
                       GSL integrator. Reduce it if NEST complains about
                       numerical instabilities.
 ============= ======= =========================================================
+\endverbatim
 
-Sends
-+++++
+Author: Mikkel Elle Lepperød adapted from aeif_psc_exp and iaf_psc_delta
 
-SpikeEvent
+Sends: SpikeEvent
 
-Receives
-++++++++
+Receives: SpikeEvent, CurrentEvent, DataLoggingRequest
 
-SpikeEvent, CurrentEvent, DataLoggingRequest
+References:
 
-References
-++++++++++
-
+\verbatim embed:rst
 .. [1] Brette R and Gerstner W (2005). Adaptive Exponential
        Integrate-and-Fire Model as an Effective Description of Neuronal
        Activity. J Neurophysiol 94:3637-3642.
        DOI: https://doi.org/10.1152/jn.00686.2005
+\endverbatim
 
-See also
-++++++++
-
-iaf_psc_delta, aeif_cond_exp, aeif_psc_exp
-
-EndUserDocs */
-
+SeeAlso: iaf_psc_delta, aeif_cond_exp, aeif_psc_exp
+*/
 class aeif_psc_delta : public Archiving_Node
 {
 

@@ -45,42 +45,40 @@
 namespace nest
 {
 
-/* BeginUserDocs: neuron, rate
+/** @BeginDocumentation
+@ingroup Neurons
+@ingroup rate
 
-Short description
-+++++++++++++++++
+Name: siegert_neuron
 
-model for mean-field analysis of spiking networks
-
-Description
-+++++++++++
+Description:
 
 siegert_neuron is an implementation of a rate model with the
 non-linearity given by the gain function of the
 leaky-integrate-and-fire neuron with delta or exponentially decaying
-synapses [2]_ and [3, their eq. 25]. The model can be used for a
+synapses [2] and [3, their eq. 25]. The model can be used for a
 mean-field analysis of spiking networks.
 
 The model supports connections to other rate models with zero
 delay, and uses the secondary_event concept introduced with the
 gap-junction framework.
 
-Parameters
-++++++++++
+Parameters:
 
 The following parameters can be set in the status dictionary.
-
+\verbatim embed:rst
 =====  ====== ==============================
  rate  1/s    Rate (1/s)
  tau   ms     Time constant
  mean  real   Additional constant input
 =====  ====== ==============================
+\endverbatim
 
 The following parameters can be set in the status directory and are
 used in the evaluation of the gain function. Parameters as in
 iaf_psc_exp/delta.
 
-
+\verbatim embed:rst
 =========  ======  =====================================================
  tau_m     ms      Membrane time constant
  tau_syn   ms      Time constant of postsynaptic currents
@@ -88,11 +86,11 @@ iaf_psc_exp/delta.
  theta     mV      Threshold relative to resting potential
  V_reset   mV      Reset relative to resting membrane potential
 =========  ======  =====================================================
+\endverbatim
 
+References:
 
-References
-++++++++++
-
+\verbatim embed:rst
 .. [1] Hahne J, Dahmen D, Schuecker J, Frommer A, Bolten M, Helias M,
        Diesmann M (2017). Integration of continuous-time dynamics in a
        spiking neural network simulator. Frontiers in Neuroinformatics, 11:34.
@@ -108,25 +106,16 @@ References
        (2015). A unified framework for spiking and gap-junction interactions
        in distributed neuronal network simulations. Frontiers in
        Neuroinformatics, 9:22. DOI: https://doi.org/10.3389/fninf.2015.00022
+\endverbatim
 
+Sends: DiffusionConnectionEvent
 
-Sends
-+++++
+Receives: DiffusionConnectionEvent, DataLoggingRequest
 
-DiffusionConnectionEvent
+Author: Jannis Schuecker, David Dahmen, Jan Hahne
 
-Receives
-++++++++
-
-DiffusionConnectionEvent, DataLoggingRequest
-
-See also
-++++++++
-
-diffusion_connection
-
-EndUserDocs */
-
+SeeAlso: diffusion_connection
+*/
 class siegert_neuron : public Archiving_Node
 {
 

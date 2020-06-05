@@ -36,13 +36,8 @@
 
 /* BeginUserDocs: device, recorder
 
-Short description
-+++++++++++++++++
-
 Recording weights from synapses
-
-Description
-+++++++++++
+###############################
 
 The change in synaptic weights over time is a key observable property in
 studies of plasticity in neuronal network models. To access this information, the
@@ -70,6 +65,7 @@ synapses that fulfill the given criteria.
    >>> post = nest.Create("iaf_psc_alpha", 10)
 
    >>> nest.Connect(pre, post, syn_spec="stdp_synapse_rec")
+
 
 EndUserDocs */
 

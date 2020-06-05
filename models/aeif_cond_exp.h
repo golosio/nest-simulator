@@ -68,15 +68,16 @@ extern "C" int aeif_cond_exp_dynamics( double, const double*, double*, void* );
  */
 extern "C" int aeif_cond_exp_dynamics_DT0( double, const double*, double*, void* );
 
-/* BeginUserDocs: neuron, adaptive threshold, integrate-and-fire, conductance-based
+/** @BeginDocumentation
+@ingroup Neurons
+@ingroup iaf
+@ingroup aeif
+@ingroup cond
 
-Short description
-+++++++++++++++++
+Name: aeif_cond_exp - Conductance based exponential integrate-and-fire neuron
+                      model according to Brette and Gerstner (2005).
 
-Conductance based exponential integrate-and-fire neuron model
-
-Description
-+++++++++++
+Description:
 
 aeif_cond_exp is the adaptive exponential integrate and fire neuron
 according to Brette and Gerstner (2005), with post-synaptic
@@ -86,25 +87,21 @@ This implementation uses the embedded 4th order Runge-Kutta-Fehlberg
 solver with adaptive stepsize to integrate the differential equation.
 
 The membrane potential is given by the following differential equation:
-
-.. math::
-
- C dV/dt= -g_L(V-E_L)+g_L*\Delta_T*\exp((V-V_T)/\Delta_T)-g_e(t)(V-E_e) \\
-                                                     -g_i(t)(V-E_i)-w +I_e
+@f[ C dV/dt= -g_L(V-E_L)+g_L*\Delta_T*\exp((V-V_T)/\Delta_T)-g_e(t)(V-E_e) \\
+                                                     -g_i(t)(V-E_i)-w +I_e @f]
 
 and
 
-.. math::
-
- \tau_w * dw/dt= a(V-E_L) -W
+@f[ \tau_w * dw/dt= a(V-E_L) -W @f]
 
 Note that the spike detection threshold V_peak is automatically set to
-:math:`V_th+10 mV` to avoid numerical instabilites that may result from
+\f$ V_th+10 mV \f$ to avoid numerical instabilites that may result from
 setting V_peak too high.
 
 Parameters:
-+++++++++++++
 The following parameters can be set in the status dictionary.
+
+\verbatim embed:rst
 
 ======== ======= =======================================
 **Dynamic state variables:**
@@ -155,33 +152,24 @@ gsl_error_tol real    This parameter controls the admissible error of the
                       GSL integrator. Reduce it if NEST complains about
                       numerical instabilities.
 ============= ======= =========================================================
+\endverbatim
 
-Sends
-+++++
+Author: Adapted from aeif_cond_alpha by Lyle Muller; full revision by Tanguy
+Fardet on December 2016
 
-SpikeEvent
+Sends: SpikeEvent
 
-Receives
-++++++++
+Receives: SpikeEvent, CurrentEvent, DataLoggingRequest
 
-SpikeEvent, CurrentEvent, DataLoggingRequest
-
-References
-++++++++++
-
+\verbatim embed:rst
 .. [1] Brette R and Gerstner W (2005). Adaptive Exponential
        Integrate-and-Fire Model as an Effective Description of Neuronal
        Activity. J Neurophysiol 94:3637-3642.
        DOI: https://doi.org/10.1152/jn.00686.2005
+\endverbatim
 
-
-See also
-++++++++
-
-iaf_cond_exp, aeif_cond_alpha
-
-EndUserDocs */
-
+SeeAlso: iaf_cond_exp, aeif_cond_alpha
+*/
 class aeif_cond_exp : public Archiving_Node
 {
 

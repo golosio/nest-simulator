@@ -216,10 +216,11 @@ template < typename ConnectionT >
 class Connector : public ConnectorBase
 {
 private:
-  BlockVector< ConnectionT > C_;
+  //BlockVector< ConnectionT > C_;
   const synindex syn_id_;
 
 public:
+  BlockVector< ConnectionT > C_;
   explicit Connector( const synindex syn_id )
     : syn_id_( syn_id )
   {
